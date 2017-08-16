@@ -348,11 +348,14 @@ def mul_var(percent = 0.6,scaler_type = 'MinMax'):
 
     X_train_mean, X_train_cov_matrix = stats(X_train_data)
     print(X_train_mean.shape)
-    prob_cv = sp.stats.multivariate_normal.pdf(X_cv_data, X_train_mean, X_train_cov_matrix)
+    prob_cv = sp.stats.multivariate_normal.pdf(X_cv_data, X_train_mean, X_train_cov_matrix)/(1e+34)
     print (prob_cv.shape)
 
     fraud_cv_prob = prob_cv[np.nonzero(y_cv_data)]
     normal_cv_prob = prob_cv[np.nonzero(y_cv_data==0)[0]]
+
+    print (np.min(fraud_cv_prob))
+    print (np.max(fraud_cv_prob))
 
 
     plt.figure()
@@ -362,5 +365,17 @@ def mul_var(percent = 0.6,scaler_type = 'MinMax'):
     plt.show()
     #print (fraud_cv_prob.shape)
 
+    epl = [0.000001, 0.00001, 0.01, 0.1, 0.5, 1, 1.5]
 
-mul_var()
+    for item in epl:
+        temp_res = prob_cv < item
+        confusion_cv = confusion_matrix(y_cv_data, np.array(temp_res))
+        print (confusion_cv)
+
+    epl_best = 0.00001
+    prob_test = sp.stats.multivariate_normal.pdf(X_test_data, X_train_mean, X_train_cov_matrix)/(1e+34)
+    res = prob_test < epl_best
+    confusion_test = confusion_matrix(y_cv_data, np.array(res))
+    print(confusion_test)
+
+rbf_svm()
